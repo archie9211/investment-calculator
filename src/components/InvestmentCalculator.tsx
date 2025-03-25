@@ -189,6 +189,43 @@ const InvestmentCalculator: React.FC = () => {
                 </span>
               </div>
             )}
+
+            {/* Inflation Impact Section */}
+            {selectedParameters.includes("inflation") && (
+              <div className="flex flex-col items-center col-span-full mt-4 pt-4 border-t">
+                <div className="flex flex-col items-center">
+                  <span className="text-sm text-muted-foreground mb-1">
+                    Inflation Adjusted Value (Today's Worth)
+                  </span>
+                  <span className="text-2xl font-bold text-orange-600">
+                    {formatIndianCurrency(
+                      projectionData[projectionData.length - 1]
+                        ?.inflationAdjustedCorpus || 0
+                    )}
+                  </span>
+                  <span className="text-sm text-muted-foreground mt-1">
+                    Final CPI:{" "}
+                    {projectionData[
+                      projectionData.length - 1
+                    ]?.currentCPI.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-sm text-muted-foreground mb-1">
+                    Purchasing Power Loss
+                  </span>
+                  <span className="text-2xl font-bold text-red-500">
+                    {projectionData[
+                      projectionData.length - 1
+                    ]?.purchasingPowerChange.toFixed(2)}
+                    %
+                  </span>
+                  <span className="text-sm text-muted-foreground mt-1">
+                    Over {inputs.investmentPeriod} years
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Visualization */}

@@ -74,7 +74,7 @@ The calculator uses standard financial formulas:
 
    - M = Maturity amount
    - P = Monthly investment
-   - i = Monthly interest rate
+   - i = Monthly interest rate (Annual rate ÷ 12)
    - n = Number of payments
 
 2. **Lumpsum Returns**: `A = P × (1 + r)^t`
@@ -84,9 +84,34 @@ The calculator uses standard financial formulas:
    - r = Interest rate
    - t = Time period
 
-3. **Inflation Adjustment**: `Present Value = Future Value ÷ (1 + i)^n`
-   - i = Inflation rate
-   - n = Number of years
+3. **Inflation Impact**
+
+   The calculator uses Consumer Price Index (CPI) to measure inflation impact:
+
+   a) **CPI Calculation**:
+
+   ```
+   CPI Year N = Base CPI × (1 + inflation rate)^N
+   Base CPI = 100 (starting year)
+   ```
+
+   b) **Real Value Calculation**:
+
+   ```
+   Real Value = Nominal Value ÷ (Current CPI ÷ Base CPI)
+   ```
+
+   c) **Purchasing Power Loss**:
+
+   ```
+   Power Loss % = ((100 - Current CPI) ÷ 100) × 100
+   ```
+
+4. **Key Metrics**:
+   - Total Investment: Sum of all investments made
+   - Nominal Returns: Final corpus - Total investment
+   - Real Returns: Inflation-adjusted corpus - Total investment
+   - Purchasing Power: Shows the relative buying power of your money over time
 
 ## Contributing
 
@@ -95,6 +120,16 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Notes on Inflation
+
+The calculator now uses a more accurate CPI-based approach to track inflation impact:
+
+- Starts with a base CPI of 100
+- Compounds inflation effect year over year
+- Shows both nominal and real values
+- Tracks purchasing power deterioration
+- Provides more realistic future value estimates
 
 ## Disclaimer
 

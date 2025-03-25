@@ -56,17 +56,64 @@ const CalculationDetails: React.FC = () => {
         </div>
 
         <div>
-          <h3 className="font-semibold mb-2">Inflation Adjustment</h3>
+          <h3 className="font-semibold mb-2">Inflation Impact</h3>
           <p className="text-muted-foreground mb-2">
-            Present value calculation considering inflation:
+            The calculator uses Consumer Price Index (CPI) to measure inflation
+            impact:
           </p>
+          <div className="space-y-4">
+            {/* CPI Calculation */}
+            <div className="bg-muted p-4 rounded-lg">
+              <h4 className="text-sm font-medium mb-2">CPI Calculation:</h4>
+              <p className="font-mono">
+                CPI Year N = Base CPI × (1 + inflation rate)^N
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Base CPI = 100 (starting year)
+              </p>
+            </div>
+
+            {/* Real Value Calculation */}
+            <div className="bg-muted p-4 rounded-lg">
+              <h4 className="text-sm font-medium mb-2">
+                Real Value Calculation:
+              </h4>
+              <p className="font-mono">
+                Real Value = Nominal Value ÷ (Current CPI ÷ Base CPI)
+              </p>
+            </div>
+
+            {/* Purchasing Power Loss */}
+            <div className="bg-muted p-4 rounded-lg">
+              <h4 className="text-sm font-medium mb-2">
+                Purchasing Power Loss:
+              </h4>
+              <p className="font-mono">
+                Power Loss % = ((100 - Current CPI) ÷ 100) × 100
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-semibold mb-2">Key Metrics</h3>
           <div className="bg-muted p-4 rounded-lg">
-            <p className="font-mono">
-              Present Value = Future Value ÷ (1 + i)^n
-            </p>
-            <ul className="mt-2 text-sm text-muted-foreground">
-              <li>i = Annual inflation rate</li>
-              <li>n = Number of years</li>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <strong>Total Investment:</strong> Sum of all investments made
+              </li>
+              <li>
+                <strong>Nominal Returns:</strong> Final corpus - Total
+                investment
+              </li>
+              <li>
+                <strong>Real Returns:</strong> Inflation-adjusted corpus - Total
+                investment
+              </li>
+              <li>
+                <strong>Purchasing Power:</strong> Shows the relative buying
+                power of your money over time
+              </li>
             </ul>
           </div>
         </div>

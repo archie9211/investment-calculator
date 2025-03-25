@@ -8,9 +8,21 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
     let currentMonthlyInvestment = inputs.monthlyInvestment;
     let yearlyInvestment: YearlyProjection[] = [];
     let totalCorpus = inputs.initialInvestment;
+    let totalWithdrawal = 0;
+
+    // Initialize CPI tracking
+    let currentCPI = 100; // Base year CPI
+    const annualInflationRate = (inputs.inflationRate || 0) / 100;
 
     for (let year = 1; year <= inputs.investmentPeriod; year++) {
-      const monthlyRate = inputs.expectedReturn / 1200; // 12% yearly = 1% monthly
+      const monthlyRate = inputs.expectedReturn / 1200;
+
+      // Calculate CPI for current year
+      currentCPI = year === 1 ? 100 : currentCPI * (1 + annualInflationRate);
+
+      // Calculate inflation factor based on CPI change
+      const inflationFactor = currentCPI / 100; // Relative to base year
+
       for (let month = 1; month <= 12; month++) {
         // Calculate monthly SIP returns
         let totalMonths = (year - 1) * 12 + month;
@@ -36,16 +48,24 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
 
         // Handle withdrawals
         if (inputs.withdrawalAmount > 0) {
+          let currentWithdrawal = 0;
           if (inputs.withdrawalFrequency === "monthly") {
-            totalCorpus -= inputs.withdrawalAmount;
+            currentWithdrawal = inputs.withdrawalAmount;
+            totalCorpus -= currentWithdrawal * totalMonths;
+          } else if (inputs.withdrawalFrequency === "yearly" && month === 12) {
+            currentWithdrawal = inputs.withdrawalAmount;
+            totalCorpus -= currentWithdrawal * year;
+            totalWithdrawal += currentWithdrawal;
+          } else {
+            totalCorpus -= totalWithdrawal;
           }
         }
 
-        const inflationFactor = Math.pow(
-          1 + (inputs.inflationRate || 0) / 100,
-          inputs.investmentPeriod - year + 1
-        );
+        // Calculate real value (inflation-adjusted) using CPI
         const inflationAdjustedCorpus = totalCorpus / inflationFactor;
+
+        // Calculate purchasing power change
+        const purchasingPowerChange = ((100 - currentCPI) / 100) * 100;
 
         // Store yearly data
         yearlyInvestment.push({
@@ -55,12 +75,9 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
           corpus: totalCorpus,
           returns: totalCorpus - totalInvestment,
           inflationAdjustedCorpus,
+          purchasingPowerChange, // New field showing purchasing power loss
+          currentCPI, // Track CPI progression
         });
-      }
-      if (inputs.withdrawalAmount > 0) {
-        if (inputs.withdrawalFrequency === "yearly") {
-          totalCorpus -= inputs.withdrawalAmount;
-        }
       }
 
       // Apply step-up for next year

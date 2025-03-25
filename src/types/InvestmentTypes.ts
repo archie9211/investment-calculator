@@ -19,6 +19,8 @@ export interface YearlyProjection {
   corpus: number;
   returns: number;
   inflationAdjustedCorpus: number;
+  purchasingPowerChange: number;
+  currentCPI: number;
 }
 
 export interface OptionalParameter {
