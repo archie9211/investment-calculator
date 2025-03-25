@@ -12,7 +12,7 @@ import { formatIndianCurrency } from "../utils/formatters";
 // Import individual input components
 import BasicInputs from "./BasicInputs";
 import StepUpInput from "./StepUpInput";
-import LumpsumInput from "./LumpSumInput";
+import LumpsumInput from "./LumpsumInput";
 import WithdrawalInput from "./WithdrawalInput";
 import InflationInput from "./InflationInput";
 import CalculationDetails from "./CalculationDetails";

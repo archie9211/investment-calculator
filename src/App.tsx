@@ -1,4 +1,3 @@
-import React from "react";
 import InvestmentCalculator from "./components/InvestmentCalculator";
 
 function App() {
