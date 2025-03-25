@@ -32,7 +32,7 @@ A comprehensive investment calculator built with React and TypeScript that helps
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/investment-calculator.git
+git clone https://github.com/archie9211/investment-calculator.git
 
 # Navigate to project directory
 cd investment-calculator
