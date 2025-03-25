@@ -5,8 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { InvestmentInputs, OptionalParameter } from "../types/InvestmentTypes";
 import { useInvestmentCalculation } from "../hooks/useInvestmentCalculation";
-import InvestmentGrowthChart from "./InvestmentGrowthChart";
-import InvestmentBreakdownChart from "./InvestmentBreakdownChart";
 import { formatIndianCurrency } from "../utils/formatters";
 
 // Import individual input components
@@ -15,8 +13,15 @@ import StepUpInput from "./StepUpInput";
 import LumpsumInput from "./LumpsumInput";
 import WithdrawalInput from "./WithdrawalInput";
 import InflationInput from "./InflationInput";
-import CalculationDetails from "./CalculationDetails";
 import Disclaimer from "./Disclaimer";
+
+const InvestmentGrowthChart = React.lazy(
+  () => import("./InvestmentGrowthChart")
+);
+const InvestmentBreakdownChart = React.lazy(
+  () => import("./InvestmentBreakdownChart")
+);
+const CalculationDetails = React.lazy(() => import("./CalculationDetails"));
 
 const InvestmentCalculator: React.FC = () => {
   // Default inputs

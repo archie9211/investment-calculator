@@ -1,6 +1,16 @@
+import React, { Suspense } from "react";
 import { Helmet } from "react-helmet";
-import InvestmentCalculator from "./components/InvestmentCalculator";
 import { siteConfig } from "./config/metadata";
+
+// Lazy load components
+const InvestmentCalculator = React.lazy(
+  () => import("./components/InvestmentCalculator")
+);
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   return (
@@ -15,7 +25,9 @@ function App() {
         <h1 className="text-3xl font-bold mb-6">
           Investment Return Calculator
         </h1>
-        <InvestmentCalculator />
+        <Suspense fallback={<LoadingSpinner />}>
+          <InvestmentCalculator />
+        </Suspense>
       </div>
     </>
   );
