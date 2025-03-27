@@ -7,7 +7,7 @@ import { InvestmentInputs, OptionalParameter } from "../types/InvestmentTypes";
 import { useInvestmentCalculation } from "../hooks/useInvestmentCalculation";
 import { formatIndianCurrency } from "../utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AnimatedNumber from "./ui/AnimatedNumber";
 

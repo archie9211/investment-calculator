@@ -3,7 +3,6 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentInputs } from "../types/InvestmentTypes";
-import { Tooltip } from "@/components/ui/tooltip";
 
 interface BasicInputsProps {
   inputs: InvestmentInputs;
@@ -27,17 +26,15 @@ const BasicInputs: React.FC<BasicInputsProps> = ({ inputs, updateInput }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       {/* Monthly Investment */}
-      <Tooltip content="Monthly investment amount for SIP">
-        <div className="w-full">
-          <Label>Monthly Investment (₹)</Label>
-          <Input
-            type="number"
-            value={inputs.monthlyInvestment}
-            onChange={handleNumberInput("monthlyInvestment", 0)}
-            placeholder="Enter monthly investment"
-          />
-        </div>
-      </Tooltip>
+      <div className="w-full">
+        <Label>Monthly Investment (₹)</Label>
+        <Input
+          type="number"
+          value={inputs.monthlyInvestment}
+          onChange={handleNumberInput("monthlyInvestment", 0)}
+          placeholder="Enter monthly investment"
+        />
+      </div>
 
       {/* Expected Return */}
       <div>
