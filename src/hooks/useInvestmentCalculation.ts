@@ -9,65 +9,70 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
     let yearlyInvestment: YearlyProjection[] = [];
     let totalCorpus = inputs.initialInvestment;
     let totalWithdrawal = 0;
+    let cumulativeLumpsum = 0;
+    let lumpsumReturn = 0;
 
     // Initialize CPI tracking
-    let currentCPI = 100; // Base year CPI
+    let currentCPI = 100;
     const annualInflationRate = (inputs.inflationRate || 0) / 100;
+    const monthlyRate = inputs.expectedReturn / 1200;
 
     for (let year = 1; year <= inputs.investmentPeriod; year++) {
-      const monthlyRate = inputs.expectedReturn / 1200;
-
       // Calculate CPI for current year
       currentCPI = year === 1 ? 100 : currentCPI * (1 + annualInflationRate);
+      const inflationFactor = currentCPI / 100;
 
-      // Calculate inflation factor based on CPI change
-      const inflationFactor = currentCPI / 100; // Relative to base year
+      // Add annual lumpsum at the beginning of each year
+      if (inputs.annualLumpsum > 0) {
+        cumulativeLumpsum = inputs.annualLumpsum + lumpsumReturn;
+        totalInvestment += inputs.annualLumpsum;
+        totalCorpus += inputs.annualLumpsum;
+      }
 
+      debugger;
       for (let month = 1; month <= 12; month++) {
-        // Calculate monthly SIP returns
         let totalMonths = (year - 1) * 12 + month;
+
+        // Calculate SIP returns including step-up
         const sipReturns =
           currentMonthlyInvestment *
           ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate) *
           (1 + monthlyRate);
 
-        // Calculate returns on existing corpus
-        const corpusReturns =
+        // Calculate returns on initial investment
+        const initialCorpusReturns =
           inputs.initialInvestment * Math.pow(1 + monthlyRate, totalMonths);
 
-        // Update total investment
+        // Calculate returns on lumpsum investments
+        lumpsumReturn = cumulativeLumpsum * Math.pow(1 + monthlyRate, month); // Only for months in current year
+
+        // Update total investment (cumulative)
         totalInvestment =
-          currentMonthlyInvestment * totalMonths + inputs.annualLumpsum;
-        // Update corpus
-        totalCorpus = corpusReturns + sipReturns;
-        // Add annual lumpsum and its returns
-        if (inputs.annualLumpsum > 0) {
-          totalCorpus +=
-            inputs.annualLumpsum * Math.pow(1 + monthlyRate, totalMonths);
-        }
+          inputs.initialInvestment +
+          currentMonthlyInvestment * totalMonths +
+          inputs.annualLumpsum * year;
+
+        // Update total corpus
+        totalCorpus = initialCorpusReturns + sipReturns + lumpsumReturn;
 
         // Handle withdrawals
         if (inputs.withdrawalAmount > 0) {
           let currentWithdrawal = 0;
           if (inputs.withdrawalFrequency === "monthly") {
             currentWithdrawal = inputs.withdrawalAmount;
-            totalCorpus -= currentWithdrawal * totalMonths;
+            totalCorpus -= currentWithdrawal;
+            totalWithdrawal += currentWithdrawal;
           } else if (inputs.withdrawalFrequency === "yearly" && month === 12) {
             currentWithdrawal = inputs.withdrawalAmount;
-            totalCorpus -= currentWithdrawal * year;
+            totalCorpus -= currentWithdrawal;
             totalWithdrawal += currentWithdrawal;
-          } else {
-            totalCorpus -= totalWithdrawal;
           }
         }
 
-        // Calculate real value (inflation-adjusted) using CPI
+        // Calculate inflation-adjusted values
         const inflationAdjustedCorpus = totalCorpus / inflationFactor;
-
-        // Calculate purchasing power change
         const purchasingPowerChange = ((100 - currentCPI) / 100) * 100;
 
-        // Store yearly data
         yearlyInvestment.push({
           year,
           month,
@@ -75,8 +80,8 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
           corpus: totalCorpus,
           returns: totalCorpus - totalInvestment,
           inflationAdjustedCorpus,
-          purchasingPowerChange, // New field showing purchasing power loss
-          currentCPI, // Track CPI progression
+          purchasingPowerChange,
+          currentCPI,
         });
       }
 

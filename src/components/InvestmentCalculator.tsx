@@ -78,11 +78,34 @@ const InvestmentCalculator: React.FC = () => {
 
   // Toggle optional parameter
   const toggleParameter = (parameterId: string) => {
-    setSelectedParameters((prev) =>
-      prev.includes(parameterId)
+    setSelectedParameters((prev) => {
+      const isRemoving = prev.includes(parameterId);
+
+      // Reset related values when removing a parameter
+      if (isRemoving) {
+        switch (parameterId) {
+          case "stepUp":
+            updateInput({ stepUpPercentage: 0 });
+            break;
+          case "lumpsum":
+            updateInput({ annualLumpsum: 0 });
+            break;
+          case "withdrawal":
+            updateInput({
+              withdrawalAmount: 0,
+            });
+            break;
+          case "inflation":
+            updateInput({ inflationRate: 0 });
+            break;
+        }
+      }
+
+      // Update selected parameters
+      return isRemoving
         ? prev.filter((id) => id !== parameterId)
-        : [...prev, parameterId]
-    );
+        : [...prev, parameterId];
+    });
   };
 
   return (

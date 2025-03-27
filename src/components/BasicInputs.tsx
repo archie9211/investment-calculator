@@ -31,7 +31,7 @@ const BasicInputs: React.FC<BasicInputsProps> = ({ inputs, updateInput }) => {
         <Input
           type="number"
           value={inputs.monthlyInvestment}
-          onChange={handleNumberInput("monthlyInvestment", 1)}
+          onChange={handleNumberInput("monthlyInvestment", 0)}
           placeholder="Enter monthly investment"
         />
       </div>
