@@ -9,10 +9,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { YearlyProjection } from "../types/InvestmentTypes";
+import { MonthlyProjection } from "../types/InvestmentTypes";
 
 interface InvestmentGrowthChartProps {
-  projectionData: YearlyProjection[];
+  projectionData: MonthlyProjection[];
 }
 
 const InvestmentGrowthChart: React.FC<InvestmentGrowthChartProps> = ({

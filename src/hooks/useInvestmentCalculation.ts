@@ -53,11 +53,9 @@ export const useInvestmentCalculation = (
 
       for (let month = 1; month <= 12; month++) {
         // --- Investments for the Current Month (at the beginning) ---
-        let investedThisMonth = 0;
         if (currentMonthlyInvestment > 0) {
           currentCorpus += currentMonthlyInvestment;
           totalInvested += currentMonthlyInvestment;
-          investedThisMonth = currentMonthlyInvestment;
         }
         // Note: Annual lumpsum already added at year start
 
