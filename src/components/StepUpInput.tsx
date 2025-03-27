@@ -1,42 +1,56 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InvestmentInputs } from "../types/InvestmentTypes";
 
-interface StepUpInputProps {
+interface Props {
   inputs: InvestmentInputs;
   updateInput: (updates: Partial<InvestmentInputs>) => void;
 }
 
-export const StepUpInput: React.FC<StepUpInputProps> = ({
-  inputs,
-  updateInput,
-}) => {
-  const [steupVal, setStepUpVal] = useState<number>(0);
-  const handleNumberInput =
-    (field: keyof InvestmentInputs, defaultValue: number = 0) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value.replace(/^0+/, ""); // Remove leading zeros
-      const numValue = Number(value);
-      e.target.value = value;
-      setStepUpVal(Number(value));
-      if (value === "" || numValue < 0) {
-        updateInput({ [field]: defaultValue });
-        e.target.value = defaultValue.toString();
-        return;
-      }
-      updateInput({ [field]: numValue });
-    };
+const StepUpInput: React.FC<Props> = ({ inputs, updateInput }) => {
+  const handleTypeChange = (value: "percentage" | "fixed") => {
+    updateInput({ stepUpType: value, stepUpValue: 0 }); // Reset value on type change
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateInput({ stepUpValue: parseFloat(e.target.value) || 0 });
+  };
+
   return (
-    <div>
-      <Label>Annual Step-Up ({steupVal} %)</Label>
-      <Input
-        type="range"
-        value={inputs.stepUpPercentage}
-        min="0"
-        max="20"
-        onChange={handleNumberInput("stepUpPercentage", 0)}
-      />
+    <div className="space-y-4 p-4 border rounded-lg">
+      <Label className="font-semibold">Step-Up Investment</Label>
+      <RadioGroup
+        defaultValue={inputs.stepUpType || "percentage"}
+        onValueChange={handleTypeChange}
+        className="flex space-x-4"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="percentage" id="stepup-percentage" />
+          <Label htmlFor="stepup-percentage">Percentage (%)</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="fixed" id="stepup-fixed" />
+          <Label htmlFor="stepup-fixed">Fixed Amount (₹)</Label>
+        </div>
+      </RadioGroup>
+      <div>
+        <Label htmlFor="stepUpValue">
+          Annual Increase {inputs.stepUpType === "percentage" ? "(%)" : "(₹)"}
+        </Label>
+        <Input
+          id="stepUpValue"
+          type="number"
+          value={inputs.stepUpValue || 0}
+          onChange={handleValueChange}
+          min="0"
+          step="any"
+          placeholder={`Enter ${
+            inputs.stepUpType === "percentage" ? "percentage" : "amount"
+          }`}
+        />
+      </div>
     </div>
   );
 };

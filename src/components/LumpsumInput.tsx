@@ -1,36 +1,62 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InvestmentInputs } from "../types/InvestmentTypes";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InvestmentInputs, LumpsumFrequency } from "../types/InvestmentTypes";
 
-interface StepUpInputProps {
+interface Props {
   inputs: InvestmentInputs;
   updateInput: (updates: Partial<InvestmentInputs>) => void;
 }
 
-const LumpsumInput: React.FC<StepUpInputProps> = ({ inputs, updateInput }) => {
-  const handleNumberInput =
-    (field: keyof InvestmentInputs, defaultValue: number = 0) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value.replace(/^0+/, ""); // Remove leading zeros
-      const numValue = Number(value);
-      e.target.value = value;
-      if (value === "" || numValue < 0) {
-        updateInput({ [field]: defaultValue });
-        e.target.value = defaultValue.toString();
-        return;
-      }
-      updateInput({ [field]: numValue });
-    };
+const LumpsumInput: React.FC<Props> = ({ inputs, updateInput }) => {
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateInput({ lumpsumAmount: parseFloat(e.target.value) || 0 });
+  };
+
+  const handleFrequencyChange = (value: LumpsumFrequency) => {
+    updateInput({ lumpsumFrequency: value });
+  };
+
   return (
-    <div>
-      <Label>Annual Lumpsum Investment (₹)</Label>
-      <Input
-        type="number"
-        value={inputs.annualLumpsum}
-        onChange={handleNumberInput("annualLumpsum", 0)}
-        placeholder="Enter annual lumpsum"
-      />
+    <div className="space-y-4 p-4 border rounded-lg">
+      <Label className="font-semibold">Lumpsum Investment</Label>
+      <div>
+        <Label htmlFor="lumpsumAmount">Lumpsum Amount (₹)</Label>
+        <Input
+          id="lumpsumAmount"
+          type="number"
+          value={inputs.lumpsumAmount || 0}
+          onChange={handleAmountChange}
+          min="0"
+          step="any"
+          placeholder="Enter lumpsum amount"
+        />
+      </div>
+      <div>
+        <Label htmlFor="lumpsumFrequency">Frequency</Label>
+        <Select
+          value={inputs.lumpsumFrequency || "never"}
+          onValueChange={handleFrequencyChange}
+        >
+          <SelectTrigger id="lumpsumFrequency">
+            <SelectValue placeholder="Select frequency" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="never">Never</SelectItem>
+            <SelectItem value="monthly">Monthly</SelectItem>
+            <SelectItem value="quarterly">Quarterly</SelectItem>
+            <SelectItem value="half-yearly">Half-Yearly</SelectItem>
+            <SelectItem value="yearly">Yearly</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };
