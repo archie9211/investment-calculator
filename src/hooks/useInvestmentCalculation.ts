@@ -11,6 +11,7 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
     let totalWithdrawal = 0;
     let cumulativeLumpsum = 0;
     let lumpsumReturn = 0;
+    let sipTilLastYear = 0;
 
     // Initialize CPI tracking
     let currentCPI = 100;
@@ -29,7 +30,6 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
         totalCorpus += inputs.annualLumpsum;
       }
 
-      debugger;
       for (let month = 1; month <= 12; month++) {
         let totalMonths = (year - 1) * 12 + month;
 
@@ -49,7 +49,8 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
         // Update total investment (cumulative)
         totalInvestment =
           inputs.initialInvestment +
-          currentMonthlyInvestment * totalMonths +
+          sipTilLastYear +
+          currentMonthlyInvestment * month +
           inputs.annualLumpsum * year;
 
         // Update total corpus
@@ -86,6 +87,7 @@ export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
       }
 
       // Apply step-up for next year
+      sipTilLastYear += currentMonthlyInvestment * 12;
       currentMonthlyInvestment *= 1 + inputs.stepUpPercentage / 100;
     }
 
