@@ -3,7 +3,6 @@ import React, { useState, Suspense, lazy } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import html2canvas from "html2canvas"; // <--- Import html2canvas
 import { Button } from "@/components/ui/button"; // Import Button
 import { Download, Github } from "lucide-react"; // Import icons
 import {
