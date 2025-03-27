@@ -1,98 +1,117 @@
 // hooks/useInvestmentCalculation.ts
+
+// hooks/useInvestmentCalculation.ts
 import { useMemo } from "react";
-import { InvestmentInputs, YearlyProjection } from "../types/InvestmentTypes";
+import { InvestmentInputs, MonthlyProjection } from "../types/InvestmentTypes"; // Assuming InvestmentInputs is defined correctly
 
-export const useInvestmentCalculation = (inputs: InvestmentInputs) => {
-  const calculateInvestmentReturns = (): YearlyProjection[] => {
-    let totalInvestment = inputs.initialInvestment;
-    let currentMonthlyInvestment = inputs.monthlyInvestment;
-    let yearlyInvestment: YearlyProjection[] = [];
-    let totalCorpus = inputs.initialInvestment;
-    let totalWithdrawal = 0;
-    let cumulativeLumpsum = 0;
-    let lumpsumReturn = 0;
-    let sipTilLastYear = 0;
+// Define a more accurate type for the output, as it contains monthly data
 
-    // Initialize CPI tracking
-    let currentCPI = 100;
-    const annualInflationRate = (inputs.inflationRate || 0) / 100;
-    const monthlyRate = inputs.expectedReturn / 1200;
+export const useInvestmentCalculation = (
+  inputs: InvestmentInputs
+): MonthlyProjection[] => {
+  const calculateInvestmentReturns = (): MonthlyProjection[] => {
+    const monthlyProjections: MonthlyProjection[] = [];
 
-    for (let year = 1; year <= inputs.investmentPeriod; year++) {
-      // Calculate CPI for current year
-      currentCPI = year === 1 ? 100 : currentCPI * (1 + annualInflationRate);
-      const inflationFactor = currentCPI / 100;
+    // --- Input Validation / Defaults (Good Practice) ---
+    const initialInvestment = inputs.initialInvestment || 0;
+    const monthlyInvestment = inputs.monthlyInvestment || 0;
+    const annualLumpsum = inputs.annualLumpsum || 0;
+    const investmentPeriod = inputs.investmentPeriod || 0;
+    const expectedReturn = inputs.expectedReturn || 0; // Annual return %
+    const stepUpPercentage = inputs.stepUpPercentage || 0; // Annual step-up %
+    const inflationRate = inputs.inflationRate || 0; // Annual inflation %
+    const withdrawalAmount = inputs.withdrawalAmount || 0;
+    const withdrawalFrequency = inputs.withdrawalFrequency;
 
-      // Add annual lumpsum at the beginning of each year
-      if (inputs.annualLumpsum > 0) {
-        cumulativeLumpsum = inputs.annualLumpsum + lumpsumReturn;
-        totalInvestment += inputs.annualLumpsum;
-        totalCorpus += inputs.annualLumpsum;
+    // --- Pre-calculate Rates ---
+    const monthlyRate = expectedReturn / 1200; // Monthly interest rate (decimal) -> 10% becomes 0.10 / 12
+    const annualInflationRate = inflationRate / 100; // Annual inflation rate (decimal)
+    const stepUpFactor = 1 + stepUpPercentage / 100; // Factor for yearly step-up
+
+    // --- Initialize Running Totals ---
+    let currentCorpus = initialInvestment;
+    let totalInvested = initialInvestment;
+    let totalWithdrawal = 0; // Cumulative withdrawals over time
+    let currentMonthlyInvestment = monthlyInvestment; // SIP amount for the current year
+    let currentCPI = 100; // Base CPI
+
+    // --- Simulation Loop ---
+    for (let year = 1; year <= investmentPeriod; year++) {
+      // Update CPI for the *start* of the current year (except year 1)
+      // Apply inflation from the *previous* year to get this year's CPI
+      if (year > 1) {
+        currentCPI *= 1 + annualInflationRate;
+      }
+      const inflationFactor = currentCPI / 100; // Inflation factor relative to base year
+
+      // Handle annual lumpsum investment at the *beginning* of the year
+      if (annualLumpsum > 0) {
+        // Add to corpus *before* monthly calculations start for the year
+        currentCorpus += annualLumpsum;
+        totalInvested += annualLumpsum;
       }
 
       for (let month = 1; month <= 12; month++) {
-        let totalMonths = (year - 1) * 12 + month;
+        // --- Investments for the Current Month (at the beginning) ---
+        let investedThisMonth = 0;
+        if (currentMonthlyInvestment > 0) {
+          currentCorpus += currentMonthlyInvestment;
+          totalInvested += currentMonthlyInvestment;
+          investedThisMonth = currentMonthlyInvestment;
+        }
+        // Note: Annual lumpsum already added at year start
 
-        // Calculate SIP returns including step-up
-        const sipReturns =
-          currentMonthlyInvestment *
-          ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate) *
-          (1 + monthlyRate);
+        // --- Calculate Growth for the Current Month ---
+        // Growth happens on the corpus *after* investments for the month are added
+        const monthlyGrowth = currentCorpus * monthlyRate;
+        currentCorpus += monthlyGrowth;
 
-        // Calculate returns on initial investment
-        const initialCorpusReturns =
-          inputs.initialInvestment * Math.pow(1 + monthlyRate, totalMonths);
-
-        // Calculate returns on lumpsum investments
-        lumpsumReturn = cumulativeLumpsum * Math.pow(1 + monthlyRate, month); // Only for months in current year
-
-        // Update total investment (cumulative)
-        totalInvestment =
-          inputs.initialInvestment +
-          sipTilLastYear +
-          currentMonthlyInvestment * month +
-          inputs.annualLumpsum * year;
-
-        // Update total corpus
-        totalCorpus = initialCorpusReturns + sipReturns + lumpsumReturn;
-
-        // Handle withdrawals
-        if (inputs.withdrawalAmount > 0) {
-          let currentWithdrawal = 0;
-          if (inputs.withdrawalFrequency === "monthly") {
-            currentWithdrawal = inputs.withdrawalAmount;
-            totalCorpus -= currentWithdrawal;
-            totalWithdrawal += currentWithdrawal;
-          } else if (inputs.withdrawalFrequency === "yearly" && month === 12) {
-            currentWithdrawal = inputs.withdrawalAmount;
-            totalCorpus -= currentWithdrawal;
-            totalWithdrawal += currentWithdrawal;
+        // --- Handle Withdrawals for the Current Month (at the end) ---
+        let withdrawalThisMonth = 0;
+        if (withdrawalAmount > 0) {
+          if (withdrawalFrequency === "monthly") {
+            withdrawalThisMonth = withdrawalAmount;
+          } else if (withdrawalFrequency === "yearly" && month === 12) {
+            // Apply yearly withdrawal at the end of the last month of the year
+            withdrawalThisMonth = withdrawalAmount;
           }
         }
 
-        // Calculate inflation-adjusted values
-        const inflationAdjustedCorpus = totalCorpus / inflationFactor;
-        const purchasingPowerChange = ((100 - currentCPI) / 100) * 100;
+        // Ensure withdrawal doesn't exceed the available corpus
+        withdrawalThisMonth = Math.min(withdrawalThisMonth, currentCorpus);
 
-        yearlyInvestment.push({
+        // Apply withdrawal
+        currentCorpus -= withdrawalThisMonth;
+        totalWithdrawal += withdrawalThisMonth; // Track cumulative withdrawals
+
+        // --- Calculate Metrics for the End of the Month ---
+        const returns = currentCorpus - totalInvested;
+        const inflationAdjustedCorpus = currentCorpus / inflationFactor;
+        // Purchasing power change: How much less $1 is worth compared to the start
+        const purchasingPowerChange = (1 / inflationFactor - 1) * 100; // e.g., -4.76% if CPI is 105
+
+        // Store monthly results
+        monthlyProjections.push({
           year,
           month,
-          totalInvestment,
-          corpus: totalCorpus,
-          returns: totalCorpus - totalInvestment,
-          inflationAdjustedCorpus,
-          purchasingPowerChange,
-          currentCPI,
+          totalInvestment: totalInvested,
+          corpus: currentCorpus,
+          returns: returns,
+          monthlyGrowth: monthlyGrowth,
+          withdrawalThisMonth: withdrawalThisMonth,
+          inflationAdjustedCorpus: inflationAdjustedCorpus,
+          purchasingPowerChange: purchasingPowerChange,
+          currentCPI: currentCPI,
         });
-      }
+      } // --- End of Month Loop ---
 
-      // Apply step-up for next year
-      sipTilLastYear += currentMonthlyInvestment * 12;
-      currentMonthlyInvestment *= 1 + inputs.stepUpPercentage / 100;
-    }
+      // Apply step-up for the *next* year's monthly investment
+      currentMonthlyInvestment *= stepUpFactor;
+    } // --- End of Year Loop ---
 
-    return yearlyInvestment;
+    return monthlyProjections;
   };
 
+  // useMemo dependency array remains correct - recalculate only if inputs change
   return useMemo(calculateInvestmentReturns, [inputs]);
 };

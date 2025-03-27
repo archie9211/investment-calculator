@@ -12,15 +12,17 @@ export interface InvestmentInputs {
   inflationRate: number;
 }
 
-export interface YearlyProjection {
+export interface MonthlyProjection {
   year: number;
   month: number;
-  totalInvestment: number;
-  corpus: number;
-  returns: number;
-  inflationAdjustedCorpus: number;
-  purchasingPowerChange: number;
-  currentCPI: number;
+  totalInvestment: number; // Cumulative cash invested up to the end of this month
+  corpus: number; // Corpus value at the end of this month
+  returns: number; // Total returns (Corpus - Total Investment) at the end of this month
+  monthlyGrowth: number; // Growth earned *during* this month
+  withdrawalThisMonth: number; // Amount withdrawn *during* this month
+  inflationAdjustedCorpus: number; // Corpus value adjusted for inflation at the end of this month
+  purchasingPowerChange: number; // Percentage change in purchasing power relative to the start
+  currentCPI: number; // CPI value for this month's year
 }
 
 export interface OptionalParameter {
